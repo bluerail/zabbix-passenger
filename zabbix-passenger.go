@@ -75,14 +75,11 @@ func print_app_groups_json() {
 
 var (
 	app     = kingpin.New("zabbix-passenger", "A utility to parse passenger-status output for usage with Zabbix")
-	appPath = app.Flag("app", "Full path to application (for app* commands)").String()
+	appPath = app.Flag("app", "Full path to application (leave out for global value)").String()
 
-	appGroupsJson      = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
-	globalQueue        = app.Command("global-queue", "Get number of requests in global queue")
-	globalCapacityUsed = app.Command("global-capacity-used", "Get global capacity used")
-
-	appQueue        = app.Command("app-queue", "Get number of requests in application queue")
-	appCapacityUsed = app.Command("app-capacity-used", "Get application capacity used")
+	appGroupsJson = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
+	queue         = app.Command("queue", "Get number of requests in queue, optionally specify app with --app-path")
+	capacityUsed  = app.Command("capacity-used", "Get global capacity used, optionally specify app with --app-path")
 )
 
 func main() {
@@ -92,13 +89,17 @@ func main() {
 
 	case appGroupsJson.FullCommand():
 		print_app_groups_json()
-	case globalQueue.FullCommand():
-		print_simple_selector("//info/get_wait_list_size")
-	case appQueue.FullCommand():
-		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/get_wait_list_size", *appPath))
-	case globalCapacityUsed.FullCommand():
-		print_simple_selector("//info/capacity_used")
-	case appCapacityUsed.FullCommand():
-		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/capacity_used", *appPath))
+	case queue.FullCommand():
+		if *appPath != "" {
+			print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/get_wait_list_size", *appPath))
+		} else {
+			print_simple_selector("//info/get_wait_list_size")
+		}
+	case capacityUsed.FullCommand():
+		if *appPath != "" {
+			print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/capacity_used", *appPath))
+		} else {
+			print_simple_selector("//info/capacity_used")
+		}
 	}
 }
