@@ -16,12 +16,21 @@ const (
 )
 
 func read_xml() *xmlpath.Node {
-	cmd := exec.Command("passenger-status", "--show=xml")
+	path, err := exec.LookPath("passenger-status")
+	if err != nil {
+		// passenger-status not found in path
+		if _, err := os.Stat("/usr/local/rvm/wrappers/default/passenger-status"); err == nil {
+			// default rvm wrapper exists so use that!
+			path = "/usr/local/rvm/wrappers/default/passenger-status"
+		}
+	}
+
+	cmd := exec.Command(path, "--show=xml")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
-  if err := cmd.Start(); err != nil {
+	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
 
