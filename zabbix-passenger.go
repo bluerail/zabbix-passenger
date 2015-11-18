@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/xml"
-	"flag"
 	"fmt"
 	"golang.org/x/net/html/charset"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"launchpad.net/xmlpath"
 	"log"
 	"os"
@@ -56,26 +56,30 @@ func print_app_groups_json() {
 	fmt.Println("]}")
 }
 
+var (
+	app     = kingpin.New("zabbix-passenger", "A utility to parse passenger-status output for usage with Zabbix")
+	appPath = app.Flag("app", "Full path to application (for app* commands)").String()
+
+	appGroupsJson      = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
+	globalQueue        = app.Command("global-queue", "Get number of requests in global queue")
+	globalCapacityUsed = app.Command("global-capacity-used", "Get global capacity used")
+
+	appQueue        = app.Command("app-queue", "Get number of requests in application queue")
+	appCapacityUsed = app.Command("app-capacity-used", "Get application capacity used")
+)
+
 func main() {
-	appGroupsJson := flag.Bool("app-groups-json", false, "Show application groups in JSON format")
-	globalQueue := flag.Bool("global-queue", false, "Print number of requests in global queue")
-	appQueue := flag.String("app-queue", "", "Print number of requests in specified app queue")
-	globalCapacityUsed := flag.Bool("global-capacity-used", false, "Print global capacity used")
-	appCapacityUsed := flag.String("app-capacity-used", "", "Print specified app capacity used")
+	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
-	flag.Parse()
-
-	if *appGroupsJson {
+	case appGroupsJson.FullCommand():
 		print_app_groups_json()
-	} else if *globalQueue {
+	case globalQueue.FullCommand():
 		print_simple_selector("//info/get_wait_list_size")
-	} else if *appQueue != "" {
-		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/get_wait_list_size", *appQueue))
-	} else if *globalCapacityUsed {
+	case appQueue.FullCommand():
+		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/get_wait_list_size", *appPath))
+	case globalCapacityUsed.FullCommand():
 		print_simple_selector("//info/capacity_used")
-	} else if *appCapacityUsed != "" {
-		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/capacity_used", *appCapacityUsed))
-	} else {
-		flag.Usage()
+	case appCapacityUsed.FullCommand():
+		print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/capacity_used", *appPath))
 	}
 }
