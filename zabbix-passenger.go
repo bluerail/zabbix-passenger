@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION = "0.9"
+	VERSION = "1.0.0"
 )
 
 func read_xml() *xmlpath.Node {
