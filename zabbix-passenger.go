@@ -92,7 +92,6 @@ func main() {
 	app.Version(VERSION)
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-
 	case appGroupsJson.FullCommand():
 		print_app_groups_json()
 	case queue.FullCommand():
