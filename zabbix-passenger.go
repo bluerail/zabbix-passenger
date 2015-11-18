@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"golang.org/x/net/html/charset"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "1.0.0"
+	VERSION = "1.0.1"
 )
 
 func read_xml() *xmlpath.Node {
@@ -66,11 +67,16 @@ func print_app_groups_json() {
 
 	app_iter := path.Iter(read_xml())
 
-	fmt.Println("{\"data\": [")
+	var entries []map[string]string
+
 	for app_iter.Next() {
-		fmt.Printf("{\"{#NAME}\": \"%v\"},\n", app_iter.Node().String())
+		entries = append(entries, map[string]string{"{#NAME}": app_iter.Node().String()})
 	}
-	fmt.Println("]}")
+
+	data := map[string][]map[string]string{"data": entries}
+
+	json, _ := json.Marshal(data)
+	fmt.Println(string(json))
 }
 
 var (
