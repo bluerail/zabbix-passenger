@@ -8,6 +8,9 @@ import (
 	"launchpad.net/xmlpath"
 	"log"
 	"os"
+
+const (
+	VERSION = "0.9"
 )
 
 func read_xml() *xmlpath.Node {
@@ -69,6 +72,8 @@ var (
 )
 
 func main() {
+	app.Version(VERSION)
+
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
 	case appGroupsJson.FullCommand():
