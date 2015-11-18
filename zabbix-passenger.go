@@ -8,21 +8,26 @@ import (
 	"launchpad.net/xmlpath"
 	"log"
 	"os"
+	"os/exec"
+)
 
 const (
 	VERSION = "0.9"
 )
 
 func read_xml() *xmlpath.Node {
-	// TODO Execute passenger-status
-	reader, err := os.Open("ppm.xml")
+	cmd := exec.Command("passenger-status", "--show=xml")
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
+		log.Fatal(err)
+	}
+  if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
 
 	// Stuff to handle the iso-8859-1 xml encoding
 	// http://stackoverflow.com/a/32224438/606167
-	decoder := xml.NewDecoder(reader)
+	decoder := xml.NewDecoder(stdout)
 	decoder.CharsetReader = charset.NewReaderLabel
 
 	xmlData, err := xmlpath.ParseDecoder(decoder)
@@ -32,7 +37,7 @@ func read_xml() *xmlpath.Node {
 
 	// Check version
 	version_path := xmlpath.MustCompile("/info/@version")
-	if version, ok := version_path.String(xmlData); !ok || version != "3" {
+	if version, ok := version_path.String(xmlData); !ok || (version != "3" && version != "2") {
 		log.Fatal("Unsupported Passenger version (xml version ", version, ")")
 	}
 
