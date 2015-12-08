@@ -96,7 +96,7 @@ func main() {
 		print_app_groups_json()
 	case queue.FullCommand():
 		if *appPath != "" {
-			print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/get_wait_list_size", *appPath))
+			print_simple_selector(fmt.Sprintf("//supergroup[name='%v']/group/get_wait_list_size", *appPath))
 		} else {
 			print_simple_selector("//info/get_wait_list_size")
 		}
