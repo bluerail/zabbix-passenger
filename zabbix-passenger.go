@@ -84,8 +84,8 @@ var (
 	appPath = app.Flag("app", "Full path to application (leave out for global value)").String()
 
 	appGroupsJson = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
-	queue         = app.Command("queue", "Get number of requests in queue, optionally specify app with --app-path")
-	capacityUsed  = app.Command("capacity-used", "Get global capacity used, optionally specify app with --app-path")
+	queue         = app.Command("queue", "Get number of requests in queue, optionally specify app with --app")
+	capacityUsed  = app.Command("capacity-used", "Get global capacity used, optionally specify app with --app")
 )
 
 func main() {
