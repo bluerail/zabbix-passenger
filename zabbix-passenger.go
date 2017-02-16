@@ -63,14 +63,20 @@ func print_simple_selector(pathString string) {
 }
 
 func print_app_groups_json() {
-	path := xmlpath.MustCompile("//group/name")
+	groupPath := xmlpath.MustCompile("//supergroup/group")
+	uuidPath := xmlpath.MustCompile("uuid")
+	namePath := xmlpath.MustCompile("name")
 
-	app_iter := path.Iter(read_xml())
+	group_iter := groupPath.Iter(read_xml())
 
 	var entries []map[string]string
 
-	for app_iter.Next() {
-		entries = append(entries, map[string]string{"{#NAME}": app_iter.Node().String()})
+	for group_iter.Next() {
+		uuid, ok1 := uuidPath.String(group_iter.Node())
+		name, ok2 := namePath.String(group_iter.Node())
+    if ok1 && ok2 {
+      entries = append(entries, map[string]string{"{#UUID}": uuid, "{#NAME}": name})
+    }
 	}
 
 	data := map[string][]map[string]string{"data": entries}
@@ -81,7 +87,7 @@ func print_app_groups_json() {
 
 var (
 	app     = kingpin.New("zabbix-passenger", "A utility to parse passenger-status output for usage with Zabbix")
-	appPath = app.Flag("app", "Full path to application (leave out for global value)").String()
+	appPath = app.Flag("app", "UUID of application (leave out for global value)").String()
 
 	appGroupsJson = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
 	queue         = app.Command("queue", "Get number of requests in queue, optionally specify app with --app")
@@ -96,13 +102,13 @@ func main() {
 		print_app_groups_json()
 	case queue.FullCommand():
 		if *appPath != "" {
-			print_simple_selector(fmt.Sprintf("//group[name='%v']/get_wait_list_size", *appPath))
+			print_simple_selector(fmt.Sprintf("//group[uuid='%v']/get_wait_list_size", *appPath))
 		} else {
 			print_simple_selector("//info/get_wait_list_size")
 		}
 	case capacityUsed.FullCommand():
 		if *appPath != "" {
-			print_simple_selector(fmt.Sprintf("//group[name='%v']/capacity_used", *appPath))
+			print_simple_selector(fmt.Sprintf("//group[uuid='%v']/capacity_used", *appPath))
 		} else {
 			print_simple_selector("//info/capacity_used")
 		}

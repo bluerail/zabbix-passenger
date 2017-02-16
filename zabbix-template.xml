@@ -152,7 +152,7 @@ https://github.com/bluerail/zabbix-passenger</description>
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>passenger.app_capacity_used[{#NAME}]</key>
+                            <key>passenger.app_capacity_used[{#UUID}]</key>
                             <delay>30</delay>
                             <history>14</history>
                             <trends>365</trends>
@@ -195,7 +195,7 @@ https://github.com/bluerail/zabbix-passenger</description>
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>passenger.app_queue[{#NAME}]</key>
+                            <key>passenger.app_queue[{#UUID}]</key>
                             <delay>30</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -235,7 +235,7 @@ https://github.com/bluerail/zabbix-passenger</description>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Passenger:passenger.app_queue[{#NAME}].last()}&gt;5</expression>
+                            <expression>{Passenger:passenger.app_queue[{#UUID}].last()}&gt;5</expression>
                             <name>More than 5 requests in queue for {#NAME}</name>
                             <url/>
                             <status>0</status>
