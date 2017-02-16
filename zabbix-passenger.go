@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"launchpad.net/xmlpath"
+	"gopkg.in/xmlpath.v2"
 	"log"
 	"os"
 	"os/exec"
+  "strconv"
 )
 
 const (
@@ -62,6 +63,24 @@ func print_simple_selector(pathString string) {
 	}
 }
 
+func print_selector_sum(pathString string) {
+  // xmlpath doesn't support sum selector so we sum in Go
+
+	path := xmlpath.MustCompile(pathString)
+
+  sum := 0
+
+  iter := path.Iter(read_xml())
+
+  for iter.Next() {
+    if intVal, err := strconv.Atoi(iter.Node().String()); err == nil {
+      sum = sum + intVal
+    }
+  }
+
+  fmt.Println(sum)
+}
+
 func print_app_groups_json() {
 	groupPath := xmlpath.MustCompile("//supergroup/group")
 	uuidPath := xmlpath.MustCompile("uuid")
@@ -92,6 +111,7 @@ var (
 	appGroupsJson = app.Command("app-groups-json", "Get list of application groups in JSON format (for LLD)")
 	queue         = app.Command("queue", "Get number of requests in queue, optionally specify app with --app")
 	capacityUsed  = app.Command("capacity-used", "Get global capacity used, optionally specify app with --app")
+	sessions      = app.Command("sessions", "GEt number of sessions, optionally specify app with --app")
 )
 
 func main() {
@@ -112,5 +132,11 @@ func main() {
 		} else {
 			print_simple_selector("//info/capacity_used")
 		}
+  case sessions.FullCommand():
+    if *appPath != "" {
+			print_selector_sum(fmt.Sprintf("//group[uuid='%v']/processes/process/sessions", *appPath))
+    } else {
+			print_selector_sum(fmt.Sprintf("//group/processes/process/sessions", *appPath))
+    }
 	}
 }
